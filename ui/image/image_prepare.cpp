@@ -14,7 +14,7 @@
 #include "base/bytes.h"
 #include "styles/palette.h"
 #include "styles/style_basic.h"
-#include "ayu/ayu_ui_settings.h"
+#include "ax/ax_ui_settings.h"
 
 #include <zlib.h>
 #include <QtCore/QFile>
@@ -530,7 +530,7 @@ ReadResult Read(ReadArgs &&args) {
 		: (radius == ImageRoundRadius::Small)
 		? Option::RoundSmall
 		: (radius == ImageRoundRadius::Ellipse
-			|| radius == ImageRoundRadius::AyuUserpic)
+			|| radius == ImageRoundRadius::AxUserpic)
 		? Option::RoundCircle
 		: Option::None);
 }
@@ -1132,9 +1132,9 @@ QImage Round(
 		QRect target) {
 	if (!static_cast<int>(corners)) {
 		return std::move(image);
-	} else if (radius == ImageRoundRadius::AyuUserpic) {
-		const auto corners_val = AyuUiSettings::getAvatarCorners();
-		if (corners_val >= AyuUiSettings::kMaxAvatarCorners) {
+	} else if (radius == ImageRoundRadius::AxUserpic) {
+		const auto corners_val = AxUiSettings::getAvatarCorners();
+		if (corners_val >= AxUiSettings::kMaxAvatarCorners) {
 			return Circle(std::move(image), target);
 		} else if (corners_val <= 0) {
 			return std::move(image);
@@ -1142,7 +1142,7 @@ QImage Round(
 		const auto size = target.isEmpty()
 			? std::min(image.width(), image.height())
 			: std::min(target.width(), target.height());
-		const auto r = int(double(corners_val) / AyuUiSettings::kMaxAvatarCorners * size / 2.0)
+		const auto r = int(double(corners_val) / AxUiSettings::kMaxAvatarCorners * size / 2.0)
 			/ style::DevicePixelRatio();
 		return Round(std::move(image), CornersMask(r), corners, target);
 	} else if (radius == ImageRoundRadius::Ellipse) {

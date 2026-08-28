@@ -16,25 +16,25 @@
 #include <QtGui/QtEvents>
 #include <QtCore/QtMath>
 
-#include "ayu/ayu_ui_settings.h"
+#include "ax/ax_ui_settings.h"
 
 namespace Ui {
 namespace {
 
 int SwitchShift(not_null<const style::Toggle *> st) {
-	return AyuUiSettings::isMaterialSwitches() ? st->shift : st::defaultToggleShift;
+	return AxUiSettings::isMaterialSwitches() ? st->shift : st::defaultToggleShift;
 }
 
 int SwitchDiameter(not_null<const style::Toggle *> st) {
-	return AyuUiSettings::isMaterialSwitches() ? st->diameter : st::defaultToggleDiameter;
+	return AxUiSettings::isMaterialSwitches() ? st->diameter : st::defaultToggleDiameter;
 }
 
 int SwitchDiameter(not_null<const style::Check *> st) {
-	return AyuUiSettings::isMaterialSwitches() ? st->diameter : st::defaultToggleDiameter;
+	return AxUiSettings::isMaterialSwitches() ? st->diameter : st::defaultToggleDiameter;
 }
 
 int SwitchDiameter(not_null<const style::Radio *> st) {
-	return AyuUiSettings::isMaterialSwitches() ? st->diameter : st::defaultToggleDiameter;
+	return AxUiSettings::isMaterialSwitches() ? st->diameter : st::defaultToggleDiameter;
 }
 
 } // namespace
@@ -58,8 +58,8 @@ void AbstractCheckView::setChecked(bool checked, anim::type animated) {
 			[=] { if (_updateCallback) _updateCallback(); },
 			_checked ? 0. : 1.,
 			_checked ? 1. : 0.,
-			AyuUiSettings::isMaterialSwitches() ? _duration : st::defaultToggleDuration,
-			AyuUiSettings::isMaterialSwitches() ? anim::easeOutCubic : anim::linear);
+			AxUiSettings::isMaterialSwitches() ? _duration : st::defaultToggleDuration,
+			AxUiSettings::isMaterialSwitches() ? anim::easeOutCubic : anim::linear);
 	}
 	checkedChangedHook(animated);
 	if (changed) {
@@ -120,7 +120,7 @@ void ToggleView::paint(QPainter &p, int left, int top, int outerWidth) {
 	auto fgBrush = anim::brush(_st->untoggledFg, _st->toggledFg, toggled);
 
 	auto fgRectF = QRectF(fgRect);
-	if (AyuUiSettings::isMaterialSwitches()) {
+	if (AxUiSettings::isMaterialSwitches()) {
 		const auto ayuToggleAnim = anim::interpolateToF(_st->animPadding, 0, toggled);
 		fgRectF.setRect(fgRectF.x() + ayuToggleAnim / 2., fgRectF.y() + ayuToggleAnim / 2., fgRectF.width() - ayuToggleAnim, fgRectF.height() - ayuToggleAnim);
 	}

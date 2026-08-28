@@ -1,12 +1,12 @@
-// This is the source code of AyuGram for Desktop.
+// Часть AxGram для Desktop. Файл изменён.
 //
-// We do not and cannot prevent the use of our code,
-// but be respectful and credit the original author.
-//
+// Основано на исходном коде AyuGram for Desktop.
 // Copyright @Radolyn, 2026
+//
+// Распространяется по GNU GPL v3 — см. LICENSE и NOTICE.md.
 #pragma once
 
-namespace AyuUiSettings {
+namespace AxUiSettings {
 
 inline constexpr int kMaxAvatarCorners = 23;
 

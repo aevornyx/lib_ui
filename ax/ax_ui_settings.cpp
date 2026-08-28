@@ -1,14 +1,14 @@
-// This is the source code of AyuGram for Desktop.
+// Часть AxGram для Desktop. Файл изменён.
 //
-// We do not and cannot prevent the use of our code,
-// but be respectful and credit the original author.
-//
+// Основано на исходном коде AyuGram for Desktop.
 // Copyright @Radolyn, 2026
-#include "ayu_ui_settings.h"
+//
+// Распространяется по GNU GPL v3 — см. LICENSE и NOTICE.md.
+#include "ax_ui_settings.h"
 
 #include <utility>
 
-namespace AyuUiSettings {
+namespace AxUiSettings {
 
 QString monoFont;
 double wideMultiplier = 1.0;

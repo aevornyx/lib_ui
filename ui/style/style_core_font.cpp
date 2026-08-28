@@ -22,8 +22,8 @@
 #endif // __has_include(<glib.h>)
 
 
-// AyuGram includes
-#include "ayu/ayu_ui_settings.h"
+// AxGram includes
+#include "ax/ax_ui_settings.h"
 
 
 void style_InitFontsResource() {
@@ -125,7 +125,7 @@ bool LoadCustomFont(const QString &filePath) {
 }
 
 [[nodiscard]] QString ManualMonospaceFont() {
-	const auto monoFont = AyuUiSettings::getMonoFont().isEmpty() ? "Cascadia Mono"_q : AyuUiSettings::getMonoFont();
+	const auto monoFont = AxUiSettings::getMonoFont().isEmpty() ? "Cascadia Mono"_q : AxUiSettings::getMonoFont();
 	const auto kTryFirst = std::initializer_list<QString>{
 		monoFont,
 		u"Cascadia Mono"_q,
