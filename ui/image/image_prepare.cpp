@@ -456,7 +456,9 @@ std::array<QImage, 4> PrepareCorners(
 		return {};
 	}
 	const auto size = reader.size();
-	if (size.width() * size.height() > kReadMaxArea) {
+	if (size.width() <= 0
+		|| size.height() <= 0
+		|| (qint64(size.width()) * size.height() > kReadMaxArea)) {
 		return {};
 	}
 	auto result = ReadResult();
@@ -530,7 +532,7 @@ ReadResult Read(ReadArgs &&args) {
 		: (radius == ImageRoundRadius::Small)
 		? Option::RoundSmall
 		: (radius == ImageRoundRadius::Ellipse
-			|| radius == ImageRoundRadius::AxUserpic)
+			|| radius == ImageRoundRadius::AyuUserpic)
 		? Option::RoundCircle
 		: Option::None);
 }
@@ -1132,7 +1134,7 @@ QImage Round(
 		QRect target) {
 	if (!static_cast<int>(corners)) {
 		return std::move(image);
-	} else if (radius == ImageRoundRadius::AxUserpic) {
+	} else if (radius == ImageRoundRadius::AyuUserpic) {
 		const auto corners_val = AxUiSettings::getAvatarCorners();
 		if (corners_val >= AxUiSettings::kMaxAvatarCorners) {
 			return Circle(std::move(image), target);
