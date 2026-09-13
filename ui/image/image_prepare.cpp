@@ -532,7 +532,7 @@ ReadResult Read(ReadArgs &&args) {
 		: (radius == ImageRoundRadius::Small)
 		? Option::RoundSmall
 		: (radius == ImageRoundRadius::Ellipse
-			|| radius == ImageRoundRadius::AyuUserpic)
+			|| radius == ImageRoundRadius::AxUserpic)
 		? Option::RoundCircle
 		: Option::None);
 }
@@ -1134,7 +1134,7 @@ QImage Round(
 		QRect target) {
 	if (!static_cast<int>(corners)) {
 		return std::move(image);
-	} else if (radius == ImageRoundRadius::AyuUserpic) {
+	} else if (radius == ImageRoundRadius::AxUserpic) {
 		const auto corners_val = AxUiSettings::getAvatarCorners();
 		if (corners_val >= AxUiSettings::kMaxAvatarCorners) {
 			return Circle(std::move(image), target);
