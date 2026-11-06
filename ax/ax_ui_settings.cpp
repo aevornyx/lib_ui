@@ -5,6 +5,7 @@
 //
 // Распространяется по GNU GPL v3 — см. LICENSE и NOTICE.md.
 #include "ax_ui_settings.h"
+#include "ui/effects/animations.h"
 
 #include <utility>
 
@@ -13,6 +14,8 @@ namespace AxUiSettings {
 QString monoFont;
 double wideMultiplier = 1.0;
 bool materialSwitches;
+bool animatedIcons = false;
+bool (*animatedIconsPolicy)() = nullptr;
 int avatarCorners = kMaxAvatarCorners;
 
 void setMonoFont(QString newFont) {
@@ -45,6 +48,20 @@ void setMaterialSwitches(bool val) {
 
 bool isMaterialSwitches() {
 	return materialSwitches;
+}
+
+void setAnimatedIconsEnabled(bool enabled) {
+	animatedIcons = enabled;
+}
+
+void setAnimatedIconsPolicy(bool (*policy)()) {
+	animatedIconsPolicy = policy;
+}
+
+bool animatedIconsEnabled() {
+	return animatedIcons
+		&& !anim::Disabled()
+		&& (!animatedIconsPolicy || animatedIconsPolicy());
 }
 
 void setAvatarCorners(int val) {

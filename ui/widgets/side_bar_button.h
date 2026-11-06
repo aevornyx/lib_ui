@@ -36,6 +36,11 @@ public:
 	void setLocked(bool locked);
 	void setShowIcon(bool shown);
 	void setShowText(bool shown);
+	void setMaximumLabelLines(int lines);
+	void setBackgroundVisible(bool shown);
+	void setForegroundOverride(
+		std::optional<QColor> normal,
+		std::optional<QColor> active);
 
 	int resizeGetHeight(int newWidth) override;
 
@@ -65,10 +70,14 @@ private:
 	QImage _iconCache;
 	QImage _iconCacheActive;
 	int _iconCacheBadgeWidth = 0;
+	bool _backgroundVisible = true;
+	std::optional<QColor> _foreground;
+	std::optional<QColor> _foregroundActive;
 	bool _active = false;
 	bool _badgeMuted = false;
 	bool _showIcon = true;
 	bool _showText = true;
+	int _maximumLabelLines = 3;
 
 	Fn<bool()> _paused;
 	Text::MarkedContext _context;

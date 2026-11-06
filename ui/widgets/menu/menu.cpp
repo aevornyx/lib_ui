@@ -38,6 +38,16 @@ Menu::Menu(QWidget *parent, QMenu *menu, const style::Menu &st)
 
 Menu::~Menu() = default;
 
+void Menu::setItemSelectionGeometry(int radius, QMargins insets, bool animated) {
+	_selectionRadius = std::max(0, radius);
+	_selectionInsets = insets;
+	_selectionAnimated = animated;
+	for (const auto &item : _actionWidgets) {
+		item->finishAnimating();
+		item->update();
+	}
+}
+
 void Menu::init() {
 	resize(_forceWidth ? _forceWidth : _st.widthMin, _st.skip * 2);
 

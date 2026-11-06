@@ -5,6 +5,7 @@
 // https://github.com/desktop-app/legal/blob/master/LEGAL
 //
 #include "ui/widgets/buttons.h"
+#include "ax/ax_ui_settings.h"
 
 #include "ui/effects/ripple_animation.h"
 #include "ui/effects/cross_animation.h"
@@ -21,6 +22,8 @@
 
 namespace Ui {
 namespace {
+
+constexpr auto kIconHoverDuration = crl::time(150);
 
 class SimpleRippleButton : public RippleButton {
 public:
@@ -674,6 +677,17 @@ void IconButton::paintEvent(QPaintEvent *e) {
 	if (position.y() < 0) {
 		position.setY((height() - icon->height()) / 2);
 	}
+	const auto degree = AxUiSettings::animatedIconsEnabled() && !isDisabled()
+		? overIconOpacity : 0.;
+	if (degree > 0.) {
+		p.setRenderHint(QPainter::SmoothPixmapTransform);
+		p.setRenderHint(QPainter::Antialiasing);
+		const auto bounds = style::rtlrect(QRect(position, icon->size()), width());
+		const auto center = QRectF(bounds).center();
+		p.translate(center);
+		p.scale(1. + .06 * degree, 1. + .06 * degree);
+		p.translate(-center);
+	}
 	if (_iconColorOverride) {
 		icon->paint(p, position, width(), *_iconColorOverride);
 	} else {
@@ -698,10 +712,14 @@ void IconButton::onStateChanged(State was, StateChangeSource source) {
 	auto over = isOver();
 	auto wasOver = static_cast<bool>(was & StateFlag::Over);
 	if (over != wasOver) {
-		if (_st.duration) {
-			auto from = over ? 0. : 1.;
-			auto to = over ? 1. : 0.;
-			_a_over.start([this] { update(); }, from, to, _st.duration);
+		const auto enhanced = AxUiSettings::animatedIconsEnabled();
+		const auto duration = _st.duration
+			? _st.duration : (enhanced ? kIconHoverDuration : crl::time(0));
+		if (duration) {
+			const auto from = enhanced
+				? _a_over.value(wasOver ? 1. : 0.) : (over ? 0. : 1.);
+			const auto to = over ? 1. : 0.;
+			_a_over.start([this] { update(); }, from, to, duration);
 		} else {
 			update();
 		}

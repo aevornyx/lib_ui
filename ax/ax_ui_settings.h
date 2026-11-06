@@ -21,6 +21,10 @@ int getWideMultiplied(int width, double mult);
 void setMaterialSwitches(bool val);
 bool isMaterialSwitches();
 
+void setAnimatedIconsEnabled(bool enabled);
+void setAnimatedIconsPolicy(bool (*policy)());
+[[nodiscard]] bool animatedIconsEnabled();
+
 void setAvatarCorners(int val);
 int getAvatarCorners();
 

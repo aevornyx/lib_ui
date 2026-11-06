@@ -10,9 +10,12 @@
 #include "ui/painter.h"
 
 #include <QtGui/QtEvents>
+#include <QtGui/QPainterPath>
 
 namespace Ui::Menu {
 namespace {
+
+constexpr auto kSelectionDuration = crl::time(140);
 
 [[nodiscard]] TextWithEntities ParseMenuItem(const QString &text) {
 	auto result = TextWithEntities();
@@ -55,6 +58,7 @@ Action::Action(
 	const style::icon *icon,
 	const style::icon *iconOver)
 : ItemBase(parent, st)
+, _menu(parent)
 , _action(action)
 , _st(st)
 , _icon(icon)
@@ -63,6 +67,20 @@ Action::Action(
 	+ _st.itemStyle.font->height
 	+ _st.itemPadding.bottom()) {
 	setAcceptBoth(true);
+	selects(
+	) | rpl::on_next([=](const CallbackData &data) {
+		const auto from = _selectionAnimation.value(data.selected ? 0. : 1.);
+		if (!_menu->itemSelectionRadius()
+			|| !_menu->itemSelectionAnimated()
+			|| anim::Disabled()) {
+			_selectionAnimation.stop();
+			update();
+		} else {
+			_selectionAnimation.start([=] { update(); },
+				from, data.selected ? 1. : 0.,
+				kSelectionDuration, anim::sineInOut);
+		}
+	}, lifetime());
 
 	fitToMenuWidth();
 	processAction();
@@ -95,7 +113,30 @@ void Action::paintEvent(QPaintEvent *e) {
 	paint(p);
 }
 
+void Action::finishAnimating() {
+	ItemBase::finishAnimating();
+	_selectionAnimation.stop();
+}
+
 void Action::paintBackground(QPainter &p, bool selected) {
+	if (const auto radius = _menu->itemSelectionRadius()) {
+		p.fillRect(QRect(0, 0, width(), _height), _st.itemBg);
+		const auto degree = _menu->itemSelectionAnimated() && !anim::Disabled()
+			? _selectionAnimation.value(selected ? 1. : 0.)
+			: (selected ? 1. : 0.);
+		if (degree > 0.) {
+			const auto bounds = QRect(0, 0, width(), _height)
+				.marginsRemoved(_menu->itemSelectionInsets());
+			p.save();
+			p.setRenderHint(QPainter::Antialiasing);
+			p.setPen(Qt::NoPen);
+			p.setBrush(anim::brush(_st.itemBg, _st.itemBgOver, degree));
+			p.drawRoundedRect(bounds, radius, radius);
+			p.restore();
+		}
+		return;
+	}
+
 	if (selected && _st.itemBgOver->c.alpha() < 255) {
 		p.fillRect(0, 0, width(), _height, _st.itemBg);
 	}
@@ -118,12 +159,44 @@ void Action::paint(Painter &p) {
 	const auto selected = isSelected();
 	paintBackground(p, selected);
 	if (enabled) {
+		p.save();
+		if (const auto radius = _menu->itemSelectionRadius()) {
+			auto outline = QPainterPath();
+			outline.addRoundedRect(QRectF(QRect(0, 0, width(), _height)
+				.marginsRemoved(_menu->itemSelectionInsets())), radius, radius);
+			p.setClipPath(outline, Qt::IntersectClip);
+		}
 		RippleButton::paintRipple(p, 0, 0);
+		p.restore();
 	}
 	if (const auto icon = (selected ? _iconOver : _icon)) {
+		const auto degree = enabled
+			&& _menu->itemSelectionRadius()
+			&& _menu->itemSelectionAnimated()
+			&& !anim::Disabled()
+			? _selectionAnimation.value(selected ? 1. : 0.) : 0.;
+		p.save();
+		if (degree > 0.) {
+			p.setRenderHint(QPainter::SmoothPixmapTransform);
+			p.setRenderHint(QPainter::Antialiasing);
+			const auto bounds = style::rtlrect(
+				QRect(_st.itemIconPosition, icon->size()), width());
+			const auto center = QRectF(bounds).center();
+			p.translate(center);
+			p.scale(1. + .06 * degree, 1. + .06 * degree);
+			p.translate(-center);
+		}
 		icon->paint(p, _st.itemIconPosition, width());
+		p.restore();
 	}
-	p.setPen(selected ? _st.itemFgOver : (enabled ? _st.itemFg : _st.itemFgDisabled));
+	if (enabled && _menu->itemSelectionRadius()) {
+		const auto degree = _menu->itemSelectionAnimated() && !anim::Disabled()
+			? _selectionAnimation.value(selected ? 1. : 0.)
+			: (selected ? 1. : 0.);
+		p.setPen(anim::color(_st.itemFg, _st.itemFgOver, degree));
+	} else {
+		p.setPen(selected ? _st.itemFgOver : (enabled ? _st.itemFg : _st.itemFgDisabled));
+	}
 	paintText(p);
 	if (hasSubmenu()) {
 		const auto skip = _st.itemRightSkip;

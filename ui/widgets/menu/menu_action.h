@@ -39,6 +39,7 @@ public:
 	not_null<QAction*> action() const override;
 
 	void handleKeyPress(not_null<QKeyEvent*> e) override;
+	void finishAnimating() override;
 
 	void setIcon(
 		const style::icon *icon,
@@ -65,6 +66,8 @@ private:
 
 	bool hasSubmenu() const;
 
+	const not_null<Menu*> _menu;
+	Ui::Animations::Simple _selectionAnimation;
 	Text::String _text;
 	QString _shortcut;
 	const not_null<QAction*> _action;

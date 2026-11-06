@@ -60,6 +60,11 @@ public:
 	void clearActions();
 	void clearLastSeparator();
 	void finishAnimating();
+	void setItemSelectionGeometry(int radius, QMargins insets, bool animated);
+	[[nodiscard]] int itemSelectionRadius() const { return _selectionRadius; }
+	[[nodiscard]] QMargins itemSelectionInsets() const { return _selectionInsets; }
+	[[nodiscard]] bool itemSelectionAnimated() const { return _selectionAnimated; }
+
 
 	bool empty() const;
 
@@ -142,6 +147,9 @@ private:
 		int visibleBottom) override;
 
 	const style::Menu &_st;
+	int _selectionRadius = 0;
+	QMargins _selectionInsets;
+	bool _selectionAnimated = false;
 
 	Fn<void(const CallbackData &data)> _activatedCallback;
 	Fn<void(const CallbackData &data)> _triggeredCallback;

@@ -150,6 +150,31 @@ void SideBarButton::setShowText(bool shown) {
 	update();
 }
 
+void SideBarButton::setBackgroundVisible(bool shown) {
+	_backgroundVisible = shown;
+	setAttribute(Qt::WA_OpaquePaintEvent, shown);
+	update();
+}
+
+void SideBarButton::setMaximumLabelLines(int lines) {
+	const auto limit = std::clamp(lines, 1, kMaxLabelLines);
+	if (_maximumLabelLines == limit) {
+		return;
+	}
+	_maximumLabelLines = limit;
+	resizeToWidth(width());
+	update();
+}
+
+void SideBarButton::setForegroundOverride(
+		std::optional<QColor> normal,
+		std::optional<QColor> active) {
+	_foreground = normal;
+	_foregroundActive = active;
+	_iconCache = _iconCacheActive = QImage();
+	update();
+}
+
 int SideBarButton::resizeGetHeight(int newWidth) {
 	auto result = _st.minHeight;
 	if (!_showText) {
@@ -157,7 +182,7 @@ int SideBarButton::resizeGetHeight(int newWidth) {
 	}
 	const auto text = std::min(
 		_text.countHeight(newWidth - _st.textSkip * 2),
-		_st.style.font->height * kMaxLabelLines);
+		_st.style.font->height * _maximumLabelLines);
 	const auto add = text - _st.style.font->height;
 	return result + std::max(add, 0);
 }
@@ -167,7 +192,9 @@ void SideBarButton::paintEvent(QPaintEvent *e) {
 	const auto clip = e->rect();
 
 	const auto &bg = _active ? _st.textBgActive : _st.textBg;
-	p.fillRect(clip, bg);
+	if (_backgroundVisible) {
+		p.fillRect(clip, bg);
+	}
 
 	RippleButton::paintRipple(p, 0, 0);
 
@@ -183,17 +210,23 @@ void SideBarButton::paintEvent(QPaintEvent *e) {
 			validateIconCache();
 			p.drawImage(x, y, _active ? _iconCacheActive : _iconCache);
 		} else {
-			icon.paint(p, x, y, width());
+			const auto color = _active ? _foregroundActive : _foreground;
+			if (color) {
+				icon.paint(p, x, y, width(), *color);
+			} else {
+				icon.paint(p, x, y, width());
+			}
 		}
 	}
 	if (_showText) {
-		p.setPen(_active ? _st.textFgActive : _st.textFg);
+		const auto color = _active ? _foregroundActive : _foreground;
+		p.setPen(color ? *color : (_active ? _st.textFgActive->c : _st.textFg->c));
 		_text.draw(p, {
 			.position = { _st.textSkip, _st.textTop },
 			.availableWidth = (width() - 2 * _st.textSkip),
 			.align = style::al_top,
 			.pausedEmoji = _paused && _paused(),
-			.elisionLines = kMaxLabelLines,
+			.elisionLines = _maximumLabelLines,
 		});
 	}
 
@@ -290,7 +323,12 @@ void SideBarButton::validateIconCache() {
 	image.fill(Qt::transparent);
 	{
 		auto p = QPainter(&image);
-		icon.paint(p, 0, 0, icon.width());
+		const auto color = _active ? _foregroundActive : _foreground;
+		if (color) {
+			icon.paint(p, 0, 0, icon.width(), *color);
+		} else {
+			icon.paint(p, 0, 0, icon.width());
+		}
 		p.setCompositionMode(QPainter::CompositionMode_Source);
 		auto hq = PainterHighQualityEnabler(p);
 		if (_iconCacheBadgeWidth) {
